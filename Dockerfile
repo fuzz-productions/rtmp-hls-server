@@ -88,10 +88,24 @@ FROM debian:${DEBIAN_VERSION}
 # Install dependencies
 RUN apt-get update && \
 	apt-get install -y \
-		ca-certificates openssl libpcre3-dev \
+		ca-certificates openssl libpcre3-dev curl gnupg \
 		librtmp1 libtheora0 libvorbis-dev libmp3lame0 \
+		apt-transport-https ca-certificates \
 		libvpx4 libx264-dev libx265-dev && \
     rm -rf /var/lib/apt/lists/*
+
+# Install Node & Yarn
+RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg > pubkey.gpg 
+RUN apt-key add pubkey.gpg 
+RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
+
+RUN curl -sL https://deb.nodesource.com/setup_12.x -o nodesource_setup.sh
+RUN bash nodesource_setup.sh
+
+RUN apt-get update && \
+	apt-get install -y \
+	yarn nodejs
+
 
 # Copy files from build stage to final stage	
 COPY --from=builder /usr/local /usr/local
@@ -109,8 +123,22 @@ COPY conf/nginx.conf /etc/nginx/nginx.conf
 
 # Copy  html players to container
 COPY players /usr/local/nginx/html/players
-COPY players/hls.html /usr/local/nginx/html/index.html
+COPY players/hls_hlsjs.html /usr/local/nginx/html/index.html
 
+COPY socketServer/demo.html /usr/local/nginx/html/socket/index.html
+
+# NodeJS SocketServer
+RUN nodejs -v
+
+COPY socketServer /usr/src
+WORKDIR /usr/src
+RUN yarn install
+
+RUN yarn start&
+CMD ["yarn", "start"]
+#CMD [ "node", "app/server.js" ]
+
+EXPOSE 3000
 EXPOSE 1935
 EXPOSE 8080
 
