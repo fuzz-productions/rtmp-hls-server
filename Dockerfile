@@ -109,6 +109,7 @@ COPY conf/nginx.conf /etc/nginx/nginx.conf
 
 # Copy  html players to container
 COPY players /usr/local/nginx/html/players
+COPY players/hls.html /usr/local/nginx/html/index.html
 
 EXPOSE 1935
 EXPOSE 8080
