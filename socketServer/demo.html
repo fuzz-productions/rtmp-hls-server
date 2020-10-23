@@ -41,7 +41,6 @@
     <script>
         const url = 'http://localhost:3000'; // Change to the URI of your Socket.io server
         const socket = io.connect( url, { reconnection: true } ); // Set false to disable automatic reconnection
-
         ;(function($) {
 
             // Initialize Socket.IO
@@ -49,23 +48,38 @@
             var status = $( '#status' ), messages = $( '#messages' );
 
             // Display connection state
-            socket.on( 'connect', function() {
+            socket.on('connect', function() {
 
                 status.attr( 'data-connected', true ).html( 'Connected' );
                 console.info( 'Connected: ' + socket_name );
-
+                //socket.emit('new user', "Viewer1")
             }).on( 'disconnect', function( reason ) {
 
                 status.removeAttr( 'data-connected' ).html( 'Disconnected' );
                 console.info( 'Disconnected: ' + socket_name );
+            });
 
+            socket.on('hello', ( number)  => {
+                console.log(number); 
+            });
+
+            socket.on('AssignNumber', (counter) => {
+                messages.append( '<p>' + counter + '</p>' );
+//                $events.appendChild(newItem(`hello - ${counter}`));
+                socket_name = "Viewer " + counter;
+                socket.emit('new user', socket_name)
             });
 
             // Listen for messages from Socket.IO
+            socket.on( "any", function( response ) {
+                console.log( `Received [${socket_name}]`, response );
+                messages.append( '<p>' + JSON.stringify(response) + '</p>' );           
+            });
+
+
+            // Listen for messages from Socket.IO
             socket.on( socket_name, function( response ) {
-
-                console.log( `Recevied [${socket_name}]`, response );
-
+                console.log( `Received [${socket_name}]`, response );
                 if( typeof response.message !== 'undefined' ) {
                     if( messages.attr( 'data-init' ) ) {
                         messages.removeAttr( 'data-init' );
@@ -73,9 +87,7 @@
                     }
                     messages.append( '<p>' + response.message + '</p>' );
                 }
-
             });
-
         })( window.jQuery );
     </script>
 
