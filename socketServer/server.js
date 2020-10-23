@@ -35,7 +35,13 @@ let debug = process.env.DEBUG || false,
 if( typeof api_key === 'undefined' || !api_key.length ) console.warn( colors.brightYellow( '[warn] API_KEY is not defined.' ) );
 
 // Static routing
-server.get( '/', ( req, res, next ) => next( new errors.ResourceNotFoundError( 'File Not Found' ) ) );
+// server.get( '/', ( req, res, next ) => { next
+//       console.log(__dirname);
+//       res.send( restify.plugins.serveStatic( { directory: __dirname + '/demo.html' } ) )
+//       next()
+// });
+
+server.get( '/', restify.plugins.serveStatic( { file: 'demo.html',  directory: __dirname  } ) );
 server.get( '/favicon.ico', restify.plugins.serveStatic( { directory: __dirname + '/public' } ) );
 
 // Relay messages to connected clients
