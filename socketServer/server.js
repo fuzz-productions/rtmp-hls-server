@@ -24,8 +24,8 @@ server.use( cors.preflight );
 server.use( cors.actual );
 
 
-const activeUsers = new Set();
-
+var activeUsers = new Array();
+var socketIds = {}
 // Static routing
 // server.get( '/', ( req, res, next ) => { next
 //       console.log(__dirname);
@@ -39,44 +39,68 @@ server.get( '/favicon.ico', restify.plugins.serveStatic( { directory: __dirname 
 // Relay messages to connected clients
 server.post( '/socket/', function( req, res, next ) {
         console.log( '[msg]', req.body );
-        //io.emit( req.params.socket, req.body );
         res.send( req.body );
         io.emit("any", req.body);
         next();
 });
 
+server.post( '/socket/:socket', function( req, res, next ) {
+  console.log( '[msg]', req.params.socket );
+  io.emit( req.params.socket, req.body );
+  res.send( req.body );
+  next();
+});
+
+
+server.get( '/sockets', function( req, res, next ) {
+  console.log( '[msg]', req.path() );
+  console.log(socketIds);
+  res.send( socketIds );
+  io.emit("devices", socketIds);
+  next();
+});
+
 io.on("connect", function (socket) {
   console.log("Made socket connection");
-  let counter = 0;
-  setInterval(() => {
-    ++counter
-    console.log("sending", counter);
-    socket.emit('hello', counter);
 
-  }, 1000);
-  
-  io.emit("AssignNumber", activeUsers.count);
-  console.log("AssignNumber", activeUsers.count);
+  io.emit("AssignNumber", activeUsers.length);
+  console.log("AssignNumber", activeUsers.length);
 
-  socket.on("new user", function (data) {
-    console.log(data);
-    socket.userId = data;
-    activeUsers.add(data);
-    io.emit("new user", [...activeUsers]);
-    socket.broadcast.emit("typing", data);
+  socket.on("newUser", function (data) {
+    deviceID = data[0];
+    name = data[1];
+    console.log("newUser", deviceID, name);
+    socket.userId = deviceID;
+    activeUsers.push(deviceID);
+    socketIds[deviceID] = {state: "idle", name: name };
+    io.emit("any", activeUsers);
+    io.emit("devices", socketIds);
+  });
+
+  socket.on("any", function (data) {
+    console.log("any", data);
+    //socket.broadcast.emit("any", data);
+    io.emit("any", data);
+  });
+
+  socket.on("status", function (data) {
+    console.log("status", data);
+    var deviceID = socket.userId
+    socketIds[deviceID] = { state: data, name: socketIds[deviceID].name }
+
+    io.emit("devices", socketIds);
   });
 
   socket.on("disconnect", () => {
-    activeUsers.delete(socket.userId);
-    io.emit("user disconnected", socket.userId);
+    activeUsers = activeUsers.filter(function(value, index, arr){ return value != socket.userId });
+    //delete(socket.userId);
+    var deviceID = socket.userId
+    io.emit("user disconnected", deviceID);
+    socketIds[deviceID] = { state: "disconnected", name: socketIds[deviceID].name }
   });
 
   socket.on("chat message", function (data) {
     io.emit("chat message", data);
-  });
-  
-  socket.on("typing", function (data) {
-    socket.broadcast.emit("typing", data);
   });
 });
 
