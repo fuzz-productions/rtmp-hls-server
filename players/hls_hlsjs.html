@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>HLS player</title>
+    <title>HLS Player</title>
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
@@ -13,16 +13,16 @@
 
 	<body>
 		<h1>Player</h1>
-		<div class="well">
-		<div class="embed-responsive">
-		   <video id="video" style="max-height: 50%" class="embed-responsive-item video-js vjs-default-skin" controls muted="muted"></video>
+		<div class="well padding" >
+		<div class="embed-responsive" style="min-height: 600pt;" >
+		   <video id="video" class="embed-responsive-item video-js vjs-default-skin" controls muted="muted"></video>
 		 </div>
 		</div>
 		<script>
 			if(Hls.isSupported()) {
 				var video = document.getElementById('video');
 				var hls = new Hls();
-				hls.loadSource('/hls/test.m3u8');
+				hls.loadSource('/hls/BBD95C4B-88E9-4C08-BBB3-F7A1997A57F9.m3u8');
 				hls.attachMedia(video);
 				hls.on(Hls.Events.MANIFEST_PARSED,function() {
 				  video.play();
@@ -31,9 +31,10 @@
 		</script>
 
 		<div id="footer">
-			<a url="http://35.170.76.214:8080/hls/test.m3u8"> hls </a> <br/>
-			<a url="rtmp://35.170.76.214:8080/show/test" >rtmp</a> <br />
-			<a url="http://35.170.76.214:8080/players/dash.html" >dash</a>
+			<a href="http://35.170.76.214:8080/hls/test.m3u8"> hls </a> <br/>
+			<a href="rtmp://35.170.76.214:8080/show/test" >rtmp</a> <br />
+				<a href="http://35.170.76.214:8080/players/hls.html" >hls</a> <br/>
+
 			  <font size="2">Updated 10:16</font>
 		</div>
 

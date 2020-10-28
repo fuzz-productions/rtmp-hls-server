@@ -97,6 +97,7 @@ io.on("connect", function (socket) {
     var deviceID = socket.userId
     io.emit("user disconnected", deviceID);
     socketIds[deviceID] = { state: "disconnected", name: socketIds[deviceID].name }
+    io.emit("devices", socketIds);
   });
 
   socket.on("chat message", function (data) {

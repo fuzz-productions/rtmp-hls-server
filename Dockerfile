@@ -106,6 +106,7 @@ RUN apt-get update && \
 # 	apt-get install -y \
 # 	yarn nodejs
 
+RUN date
 
 # Copy files from build stage to final stage	
 COPY --from=builder /usr/local /usr/local
